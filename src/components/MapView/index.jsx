@@ -1,33 +1,33 @@
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { GoogleMap, Marker } from "@react-google-maps/api";
 import PropTypes from "prop-types";
 
 const MapView = ({ selectedContact }) => {
+  const containerStyle = {
+    width: "100%",
+    height: "100%",
+  };
+
+  const center = selectedContact?.location
+    ? { lat: selectedContact.location.lat, lng: selectedContact.location.lng }
+    : { lat: 20, lng: 0 };
+
   return (
-    <MapContainer
-      center={
-        selectedContact?.location
-          ? [selectedContact.location.lat, selectedContact.location.lng]
-          : [20, 0]
-      }
-      zoom={selectedContact ? 10 : 2}
-      style={{ height: "100%", width: "100%" }}
+    <GoogleMap
+      mapContainerStyle={containerStyle}
+      center={center}
+      zoom={selectedContact ? 20 : 2}
     >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-      />
-      {selectedContact && (
-        <Marker position={selectedContact.location}>
-          <Popup>{selectedContact.name}</Popup>
-        </Marker>
-      )}
-    </MapContainer>
+      {selectedContact?.location && <Marker position={center}></Marker>}
+    </GoogleMap>
   );
 };
+
 MapView.propTypes = {
   selectedContact: PropTypes.shape({
-    location: PropTypes.arrayOf(PropTypes.number).isRequired,
+    location: PropTypes.shape({
+      lat: PropTypes.number.isRequired,
+      lng: PropTypes.number.isRequired,
+    }),
     name: PropTypes.string.isRequired,
   }),
 };

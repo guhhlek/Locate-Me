@@ -1,18 +1,20 @@
 import {
-  List,
-  ListItem,
-  ListItemText,
-  Typography,
   Box,
   IconButton,
   TextField,
   Button,
   Paper,
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
 } from "@mui/material";
-import PropTypes from "prop-types";
 import AddIcon from "@mui/icons-material/Add";
+import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
+import AddressSuggestions from "../AddressSuggestions";
 
+/* global google */
 const ContactsList = ({ user, selectedContact, handleContactClick }) => {
   const [contacts, setContacts] = useState([]);
   const [showForm, setShowForm] = useState(false);
@@ -21,6 +23,7 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
     cpf: "",
     phone: "",
     address: "",
+    location: null,
   });
 
   useEffect(() => {
@@ -32,10 +35,9 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
   }, [user]);
 
   const handleSaveContact = () => {
-    if (!newContact.name) return;
+    if (!newContact.name || !newContact.location) return;
 
     const updatedContacts = [...contacts, { ...newContact }];
-
     const users = JSON.parse(localStorage.getItem("users")) || {};
     users[user].contacts = updatedContacts;
     localStorage.setItem("users", JSON.stringify(users));
@@ -45,6 +47,31 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
 
   const handleAddContact = () => {
     setShowForm(!showForm);
+  };
+
+  const handleAddressChange = (address) => {
+    setNewContact((prev) => ({ ...prev, address }));
+  };
+
+  const handleAddressSelect = (address) => {
+    setNewContact((prev) => ({ ...prev, address: address.description }));
+    fetchLocation(address.description);
+  };
+
+  const fetchLocation = (address) => {
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ address: address }, (results, status) => {
+      if (status === google.maps.GeocoderStatus.OK) {
+        const { lat, lng } = results[0].geometry.location;
+
+        setNewContact((prev) => ({
+          ...prev,
+          location: { lat: lat(), lng: lng() },
+        }));
+      } else {
+        console.error("Geocoding failed: " + status);
+      }
+    });
   };
 
   return (
@@ -69,13 +96,7 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
           borderRadius: "8px",
         }}
       >
-        <Typography
-          variant="h6"
-          sx={{
-            color: "white",
-            fontWeight: "bold",
-          }}
-        >
+        <Typography variant="h6" sx={{ color: "white", fontWeight: "bold" }}>
           Contatos
         </Typography>
         <IconButton onClick={handleAddContact}>
@@ -114,14 +135,10 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
             }
             sx={{ mb: 2 }}
           />
-          <TextField
-            label="address"
-            fullWidth
-            value={newContact.address}
-            onChange={(e) =>
-              setNewContact({ ...newContact, address: e.target.value })
-            }
-            sx={{ mb: 2 }}
+          <AddressSuggestions
+            address={newContact.address}
+            onAddressChange={handleAddressChange}
+            onAddressSelect={handleAddressSelect}
           />
           <Button variant="contained" onClick={handleSaveContact}>
             Adicionar Contato
@@ -161,11 +178,7 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
 
 ContactsList.propTypes = {
   user: PropTypes.string.isRequired,
-  selectedContact: PropTypes.shape({
-    id: PropTypes.number,
-    name: PropTypes.string,
-    cpf: PropTypes.string,
-  }),
+  selectedContact: PropTypes.object,
   handleContactClick: PropTypes.func.isRequired,
 };
 
