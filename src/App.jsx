@@ -6,37 +6,30 @@ import ContactsList from "./components/ContactsList";
 import Auth from "./components/Auth";
 import theme from "./theme/theme";
 
-const contacts = [
-  {
-    id: 1,
-    name: "Alice",
-    location: { lat: -25.443521692455874, lng: -49.27889574608869 },
-  },
-  { id: 2, name: "Bob", location: { lat: 34.0522, lng: -118.2437 } },
-  { id: 3, name: "Charlie", location: { lat: 40.7128, lng: -74.006 } },
-];
-
 const App = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(localStorage.getItem("loggedInUser"));
 
   useEffect(() => {
-    const user = localStorage.getItem("loggedInUser");
     if (user) {
       setIsLoggedIn(true);
     }
-  }, []);
+  }, [user]);
 
   const handleContactClick = (contact) => {
     setSelectedContact(contact);
   };
 
-  const handleLoginSuccess = () => {
+  const handleLoginSuccess = (username) => {
+    setUser(username);
+    localStorage.setItem("loggedInUser", username);
     setIsLoggedIn(true);
   };
 
   const handleLogout = () => {
     localStorage.removeItem("loggedInUser");
+    setUser(null);
     setIsLoggedIn(false);
   };
 
@@ -64,7 +57,7 @@ const App = () => {
               }}
             >
               <ContactsList
-                contacts={contacts}
+                user={user}
                 selectedContact={selectedContact}
                 handleContactClick={handleContactClick}
               />
@@ -75,7 +68,7 @@ const App = () => {
                   bgcolor: "background.default",
                 }}
               >
-                <UserProfile handleLogout={handleLogout} />
+                <UserProfile handleLogout={handleLogout} user={user} />
               </Box>
             </Box>
           </>

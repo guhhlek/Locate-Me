@@ -3,9 +3,9 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import LogoutIcon from "@mui/icons-material/Logout";
 import PropTypes from "prop-types";
 
-const UserProfile = ({ handleLogout }) => {
+const UserProfile = ({ handleLogout, user }) => {
   const users = JSON.parse(localStorage.getItem("users"));
-  const userName = users ? users.name : "Usuário";
+  const userName = users[user] ? users[user].name : "Usuário";
 
   return (
     <Box
@@ -36,6 +36,7 @@ const UserProfile = ({ handleLogout }) => {
 
 UserProfile.propTypes = {
   handleLogout: PropTypes.func.isRequired,
+  user: PropTypes.string.isRequired,
 };
 
 export default UserProfile;

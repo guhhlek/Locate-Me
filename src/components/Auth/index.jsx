@@ -13,10 +13,10 @@ const Auth = ({ onLoginSuccess }) => {
     const users = JSON.parse(localStorage.getItem("users")) || {};
 
     if (isLogin) {
-      if (users && users["email"] === email && users["password"] === password) {
+      if (users[email] && users[email].password === password) {
         localStorage.setItem("loggedInUser", email);
         setMessage("Login realizado com sucesso!");
-        onLoginSuccess();
+        onLoginSuccess(email);
       } else {
         setMessage("E-mail ou senha incorretos.");
       }
@@ -24,9 +24,8 @@ const Auth = ({ onLoginSuccess }) => {
       if (users[email]) {
         setMessage("E-mail já cadastrado.");
       } else {
-        users["email"] = email;
-        users["password"] = password;
-        users["name"] = name;
+        localStorage.setItem("users", JSON.stringify(users));
+        users[email] = { email, password, name, contacts: [] };
         localStorage.setItem("users", JSON.stringify(users));
         setMessage("Cadastro realizado com sucesso!");
         setIsLogin(true);
