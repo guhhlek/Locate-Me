@@ -5,7 +5,6 @@ import AddressSuggestions from "../AddressSuggestions";
 import PropTypes from "prop-types";
 import { validateCpf } from "../../utils/validateCpf";
 
-/* global google */
 const ContactForm = ({
   initialContact,
   onSave,
@@ -28,23 +27,26 @@ const ContactForm = ({
 
   const handleAddressSelect = (address) => {
     setContact((prev) => ({ ...prev, address: address.description }));
-    fetchLocation(address.description);
+    fetchLocation(address.place_id);
   };
 
-  const fetchLocation = (address) => {
-    const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ address: address }, (results, status) => {
-      if (status === google.maps.GeocoderStatus.OK) {
-        const { lat, lng } = results[0].geometry.location;
-
-        setContact((prev) => ({
-          ...prev,
-          location: { lat: lat(), lng: lng() },
-        }));
-      } else {
-        console.error("Geocoding failed: " + status);
-      }
-    });
+  const fetchLocation = (placeId) => {
+    fetch(`http://localhost:5000/place-details?place_id=${placeId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.geometry) {
+          const { lat, lng } = data.geometry.location;
+          setContact((prev) => ({
+            ...prev,
+            location: { lat, lng },
+          }));
+        } else {
+          console.error("Erro no fetch: ", data.status);
+        }
+      })
+      .catch((error) =>
+        console.error("Erro na busca de detalhes do lugar: ", error)
+      );
   };
 
   const handleSave = () => {

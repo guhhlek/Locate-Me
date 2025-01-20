@@ -2,7 +2,6 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { Box, TextField } from "@mui/material";
 
-/* global google */
 const AddressSuggestions = ({ address, onAddressChange, onAddressSelect }) => {
   const [addressSuggestions, setAddressSuggestions] = useState([]);
   const [isAddressSelected, setIsAddressSelected] = useState(false);
@@ -13,29 +12,29 @@ const AddressSuggestions = ({ address, onAddressChange, onAddressSelect }) => {
     setIsAddressSelected(false);
 
     if (query.length > 2) {
-      if (window.google && window.google.maps) {
-        fetchAddressSuggestions(query);
-      } else {
-        console.error("Google Maps API não carregada.");
-      }
+      fetchAutoComplete(query);
     } else {
       setAddressSuggestions([]);
     }
   };
 
-  const fetchAddressSuggestions = (query) => {
-    if (typeof window.google !== "undefined" && window.google.maps) {
-      const service = new google.maps.places.AutocompleteService();
-      service.getPlacePredictions(
-        { input: query, types: ["address"] },
-        (predictions, status) => {
-          if (status === google.maps.places.PlacesServiceStatus.OK) {
-            setAddressSuggestions(predictions);
-          } else {
-            setAddressSuggestions([]);
-          }
-        }
+  const fetchAutoComplete = async (query) => {
+    try {
+      const response = await fetch(
+        `http://localhost:5000/autocomplete?input=${query}`
       );
+      const data = await response.json();
+      console.log(data);
+
+      if (data.status === "OK") {
+        setAddressSuggestions(data.predictions);
+      } else {
+        setAddressSuggestions([]);
+        console.error("Erro na API AutoComplete: ", data.status);
+      }
+    } catch (error) {
+      console.error("Erro ao buscar sugestões de endereço: ", error);
+      setAddressSuggestions([]);
     }
   };
 
