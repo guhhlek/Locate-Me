@@ -52,16 +52,18 @@ const UserProfile = ({ handleLogout, user }) => {
       <Typography variant="h6" fontWeight="bold" sx={{ flexGrow: 1 }}>
         {userName}
       </Typography>
-      <IconButton color="error" onClick={handleLogout} aria-label="Logout">
-        <LogoutIcon />
-      </IconButton>
-      <IconButton
-        color="error"
-        onClick={() => setModalOpen(true)}
-        aria-label="Delete Account"
-      >
-        <DeleteIcon />
-      </IconButton>
+      <Box>
+        <IconButton color="error" onClick={handleLogout} aria-label="Logout">
+          <LogoutIcon />
+        </IconButton>
+        <IconButton
+          color="error"
+          onClick={() => setModalOpen(true)}
+          aria-label="Delete Account"
+        >
+          <DeleteIcon />
+        </IconButton>
+      </Box>
 
       <Modal
         open={isModalOpen}
