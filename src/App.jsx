@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Box, CssBaseline, ThemeProvider } from "@mui/material";
 import UserProfile from "./components/UserProfile";
 import MapView from "./components/MapView";
-import ContactsList from "./components/ContactsList";
+import Contacts from "./components/Contacts";
 import Auth from "./components/Auth";
 import theme from "./theme/theme";
 
@@ -10,7 +10,6 @@ const App = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(localStorage.getItem("loggedInUser"));
-
   useEffect(() => {
     if (user) {
       setIsLoggedIn(true);
@@ -56,7 +55,7 @@ const App = () => {
                 flexDirection: "column",
               }}
             >
-              <ContactsList
+              <Contacts
                 user={user}
                 selectedContact={selectedContact}
                 handleContactClick={handleContactClick}
