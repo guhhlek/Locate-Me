@@ -10,6 +10,8 @@ import {
   ListItemText,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import AddressSuggestions from "../AddressSuggestions";
@@ -22,6 +24,7 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
   const [searchTerm, setSearchTerm] = useState("");
   const [sortOrder, setSortOrder] = useState("asc");
   const [showForm, setShowForm] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   const [newContact, setNewContact] = useState({
     name: "",
     cpf: "",
@@ -58,10 +61,30 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
     setFilteredContacts(updatedContacts);
   }, [contacts, searchTerm, sortOrder]);
 
+  useEffect(() => {
+    if (!isEditing) {
+      setNewContact({
+        name: "",
+        cpf: "",
+        phone: "",
+        address: "",
+        location: null,
+      });
+    }
+  }, [isEditing]);
+
   const handleSaveContact = () => {
     if (!newContact.name || !newContact.location) return;
 
-    const updatedContacts = [...contacts, { ...newContact }];
+    let updatedContacts;
+    if (isEditing) {
+      updatedContacts = contacts.map((contact) =>
+        contact.cpf === newContact.cpf ? newContact : contact
+      );
+    } else {
+      updatedContacts = [...contacts, { ...newContact }];
+    }
+
     const users = JSON.parse(localStorage.getItem("users")) || {};
     users[user].contacts = updatedContacts;
     localStorage.setItem("users", JSON.stringify(users));
@@ -70,7 +93,29 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
   };
 
   const handleAddContact = () => {
+    setNewContact({
+      name: "",
+      cpf: "",
+      phone: "",
+      address: "",
+      location: null,
+    });
     setShowForm(!showForm);
+    setIsEditing(false);
+  };
+
+  const handleDeleteContact = (cpf) => {
+    const updatedContacts = contacts.filter((contact) => contact.cpf !== cpf);
+    const users = JSON.parse(localStorage.getItem("users")) || {};
+    users[user].contacts = updatedContacts;
+    localStorage.setItem("users", JSON.stringify(users));
+    setContacts(updatedContacts);
+  };
+
+  const handleEditContact = (contact) => {
+    setNewContact(contact);
+    setShowForm(true);
+    setIsEditing(true);
   };
 
   const handleAddressChange = (address) => {
@@ -176,7 +221,7 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
             onAddressSelect={handleAddressSelect}
           />
           <Button variant="contained" onClick={handleSaveContact}>
-            Adicionar Contato
+            {isEditing ? "Salvar Alterações" : "Adicionar Contato"}
           </Button>
         </Paper>
       )}
@@ -203,6 +248,12 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
             }}
           >
             <ListItemText primary={contact.name} />
+            <IconButton onClick={() => handleEditContact(contact)}>
+              <EditIcon />
+            </IconButton>
+            <IconButton onClick={() => handleDeleteContact(contact.cpf)}>
+              <DeleteIcon />
+            </IconButton>
           </ListItem>
         ))}
       </List>
