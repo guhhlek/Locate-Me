@@ -52,7 +52,7 @@ const ContactForm = ({
       (existingContact) => existingContact.cpf === contact.cpf
     );
 
-    if (cpfExists) {
+    if (cpfExists && !isEditing) {
       setCpfExistsError("Este CPF já está cadastrado.");
       return;
     }
