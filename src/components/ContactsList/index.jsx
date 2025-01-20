@@ -13,10 +13,14 @@ import AddIcon from "@mui/icons-material/Add";
 import PropTypes from "prop-types";
 import { useState, useEffect } from "react";
 import AddressSuggestions from "../AddressSuggestions";
+import InputSearch from "../InputSearch";
 
 /* global google */
 const ContactsList = ({ user, selectedContact, handleContactClick }) => {
   const [contacts, setContacts] = useState([]);
+  const [filteredContacts, setFilteredContacts] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [sortOrder, setSortOrder] = useState("asc");
   const [showForm, setShowForm] = useState(false);
   const [newContact, setNewContact] = useState({
     name: "",
@@ -33,6 +37,26 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
       setContacts(userContacts);
     }
   }, [user]);
+
+  useEffect(() => {
+    let updatedContacts = [...contacts];
+
+    if (searchTerm) {
+      updatedContacts = updatedContacts.filter((contact) =>
+        contact.name.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    updatedContacts.sort((a, b) => {
+      if (sortOrder === "asc") {
+        return a.name.localeCompare(b.name);
+      } else {
+        return b.name.localeCompare(a.name);
+      }
+    });
+
+    setFilteredContacts(updatedContacts);
+  }, [contacts, searchTerm, sortOrder]);
 
   const handleSaveContact = () => {
     if (!newContact.name || !newContact.location) return;
@@ -74,6 +98,10 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
     });
   };
 
+  const toggleSortOrder = () => {
+    setSortOrder((prevOrder) => (prevOrder === "asc" ? "desc" : "asc"));
+  };
+
   return (
     <Box
       sx={{
@@ -103,6 +131,13 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
           <AddIcon sx={{ color: "white" }} />
         </IconButton>
       </Box>
+
+      <InputSearch
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
+        sortOrder={sortOrder}
+        toggleSortOrder={toggleSortOrder}
+      />
 
       {showForm && (
         <Paper sx={{ padding: 2, mb: 2 }}>
@@ -147,30 +182,29 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
       )}
 
       <List sx={{ pt: 0 }}>
-        {contacts &&
-          contacts.map((contact, index) => (
-            <ListItem
-              key={index}
-              component="div"
-              onClick={() => handleContactClick(contact)}
-              sx={{
-                borderRadius: "8px",
-                mb: 1,
-                cursor: "pointer",
-                "&:hover": { bgcolor: "#2ec7d6" },
-                bgcolor:
-                  selectedContact?.cpf === contact.cpf
-                    ? "primary.main"
-                    : "transparent",
-                color:
-                  selectedContact?.cpf === contact.cpf
-                    ? "primary.contrastText"
-                    : "inherit",
-              }}
-            >
-              <ListItemText primary={contact.name} />
-            </ListItem>
-          ))}
+        {filteredContacts.map((contact, index) => (
+          <ListItem
+            key={index}
+            component="div"
+            onClick={() => handleContactClick(contact)}
+            sx={{
+              borderRadius: "8px",
+              mb: 1,
+              cursor: "pointer",
+              "&:hover": { bgcolor: "#2ec7d6" },
+              bgcolor:
+                selectedContact?.cpf === contact.cpf
+                  ? "primary.main"
+                  : "transparent",
+              color:
+                selectedContact?.cpf === contact.cpf
+                  ? "primary.contrastText"
+                  : "inherit",
+            }}
+          >
+            <ListItemText primary={contact.name} />
+          </ListItem>
+        ))}
       </List>
     </Box>
   );
