@@ -13,6 +13,8 @@ import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import PropTypes from "prop-types";
+import InputMask from "react-input-mask";
+import cpf from "cpf";
 import { useState, useEffect } from "react";
 import AddressSuggestions from "../AddressSuggestions";
 import InputSearch from "../InputSearch";
@@ -25,6 +27,7 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
   const [sortOrder, setSortOrder] = useState("asc");
   const [showForm, setShowForm] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [cpfError, setCpfError] = useState("");
   const [newContact, setNewContact] = useState({
     name: "",
     cpf: "",
@@ -73,8 +76,24 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
     }
   }, [isEditing]);
 
+  const handleCpfBlur = () => {
+    const cleanCpf = newContact.cpf.replace(/[^\d]+/g, "");
+    const isValidCpf = cpf.isValid(cleanCpf);
+
+    if (cleanCpf && !isValidCpf) {
+      setCpfError("CPF inválido.");
+    } else {
+      setCpfError("");
+    }
+  };
+
+  const handleCpfChange = (e) => {
+    setNewContact({ ...newContact, cpf: e.target.value });
+    setCpfError("");
+  };
+
   const handleSaveContact = () => {
-    if (!newContact.name || !newContact.location) return;
+    if (!newContact.name || !newContact.location || cpfError) return;
 
     let updatedContacts;
     if (isEditing) {
@@ -195,16 +214,24 @@ const ContactsList = ({ user, selectedContact, handleContactClick }) => {
             }
             sx={{ mb: 2 }}
           />
-          <TextField
-            label="CPF"
-            fullWidth
-            type="number"
+          <InputMask
+            mask="999.999.999-99"
             value={newContact.cpf}
-            onChange={(e) =>
-              setNewContact({ ...newContact, cpf: e.target.value })
-            }
-            sx={{ mb: 2 }}
-          />
+            onChange={handleCpfChange}
+            onBlur={handleCpfBlur}
+            maskChar={null}
+          >
+            {(inputProps) => (
+              <TextField
+                {...inputProps}
+                label="CPF"
+                fullWidth
+                error={!!cpfError}
+                helperText={cpfError || ""}
+                sx={{ mb: 2 }}
+              />
+            )}
+          </InputMask>
           <TextField
             label="Telefone"
             fullWidth
