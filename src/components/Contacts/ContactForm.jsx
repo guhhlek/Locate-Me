@@ -1,9 +1,13 @@
-import { useState } from "react";
+import { useState, forwardRef } from "react";
 import { TextField, Button, Paper } from "@mui/material";
-import InputMask from "react-input-mask";
+import { IMaskInput } from "react-imask";
 import AddressSuggestions from "../AddressSuggestions";
 import PropTypes from "prop-types";
 import { validateCpf } from "../../utils/validateCpf";
+
+const MaskedCpfInput = forwardRef(function MaskedCpfInput(props, ref) {
+  return <IMaskInput {...props} mask="000.000.000-00" inputRef={ref} />;
+});
 
 const ContactForm = ({
   initialContact,
@@ -41,7 +45,7 @@ const ContactForm = ({
             location: { lat, lng },
           }));
         } else {
-          console.error("Erro no fetch: ", data.status);
+          console.error("Erro na API PlaceDetails: ", data.status);
         }
       })
       .catch((error) =>
@@ -72,24 +76,20 @@ const ContactForm = ({
         onChange={(e) => setContact({ ...contact, name: e.target.value })}
         sx={{ mb: 2 }}
       />
-      <InputMask
-        mask="999.999.999-99"
+      <TextField
+        label="CPF"
+        fullWidth
         value={contact.cpf}
         onChange={handleCpfChange}
         onBlur={handleCpfBlur}
-        maskChar={null}
-      >
-        {(inputProps) => (
-          <TextField
-            {...inputProps}
-            label="CPF"
-            fullWidth
-            error={!!cpfError || !!cpfExistsError}
-            helperText={cpfError || cpfExistsError}
-            sx={{ mb: 2 }}
-          />
-        )}
-      </InputMask>
+        disabled={isEditing}
+        InputProps={{
+          inputComponent: MaskedCpfInput,
+        }}
+        error={!!cpfError || !!cpfExistsError}
+        helperText={cpfError || cpfExistsError}
+        sx={{ mb: 2 }}
+      />
       <TextField
         label="Telefone"
         fullWidth

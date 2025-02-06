@@ -22,7 +22,8 @@ const Contacts = ({ user, selectedContact, handleContactClick }) => {
 
   useEffect(() => {
     const filtered = contacts.filter((contact) =>
-      contact.name.toLowerCase().includes(searchTerm.toLowerCase())
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.cpf.includes(searchTerm)
     );
 
     filtered.sort((a, b) => {

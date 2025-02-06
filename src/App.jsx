@@ -10,11 +10,7 @@ const App = () => {
   const [selectedContact, setSelectedContact] = useState(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(localStorage.getItem("loggedInUser"));
-  useEffect(() => {
-    if (user) {
-      setIsLoggedIn(true);
-    }
-  }, [user]);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const handleContactClick = (contact) => {
     setSelectedContact(contact);
@@ -31,6 +27,28 @@ const App = () => {
     setUser(null);
     setIsLoggedIn(false);
   };
+
+  useEffect(() => {
+    if (user) {
+      setIsLoggedIn(true);
+    }
+  }, [user]);
+
+  useEffect(() => {
+    const checkGoogleMaps = () => {
+      if (window.google) {
+        setIsLoaded(true);
+      } else {
+        setTimeout(checkGoogleMaps, 100);
+      }
+    };
+
+    checkGoogleMaps();
+  }, []);
+
+  if (!isLoaded) {
+    return <div>Carregando mapa...</div>;
+  }
 
   return (
     <ThemeProvider theme={theme}>

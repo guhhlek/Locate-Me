@@ -28,7 +28,7 @@ app.get("/autocomplete", async (req, res) => {
     } else {
       console.error(`Erro na API autocomplete: ${data.status}`);
       res.status(400).json({
-        error: "Erro na API Places",
+        error: "Erro ao buscar sugestões",
         status: data.status,
       });
     }

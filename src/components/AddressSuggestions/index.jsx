@@ -24,7 +24,6 @@ const AddressSuggestions = ({ address, onAddressChange, onAddressSelect }) => {
         `http://localhost:5000/autocomplete?input=${query}`
       );
       const data = await response.json();
-      console.log(data);
 
       if (data.status === "OK") {
         setAddressSuggestions(data.predictions);
